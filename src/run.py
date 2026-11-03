@@ -3,26 +3,24 @@
 #   python experiments/run.py sc x       -> scale + cross
 # Alias: sc=scale, se=sense, x=cross, q=sequenced
 
-import argparse
-import sys
-from pathlib import Path
-
-# Tambahkan folder induk ke sys.path agar config dan src dapat diimpor
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import argparse, sys
 
 from config import CATEGORIES, N_ITERATIONS, PROCESSED_DIR, RUNS_DIR
-from src.ciphers import CIPHERS, char_test
-from src.io_utils import (
+from core.ciphers import CIPHERS, char_test
+from core.io_utils import (
     append_log,
     load_dataset,
     new_run_dir,
     save_category,
     save_json,
 )
-from src.metrics import validate
+from core.metrics import validate
 
 ALIASES = {"sc": "scale", "se": "sense", "x": "cross", "q": "sequenced"}
 
+sys.stdout.reconfigure(
+    encoding="utf-8", errors="replace"
+)
 
 def print_progress(i, total):
     step = max(1, total // 100)

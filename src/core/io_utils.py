@@ -1,11 +1,10 @@
-import json
-import time
+import json, time
 from pathlib import Path
 
 
-def save_json(path: Path, data):
+def save_json(path: Path, data, indent=4):
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+        json.dump(data, f, ensure_ascii=False, indent=indent)
 
 
 def load_dataset(path: Path) -> tuple[int, list[str]]:
@@ -33,11 +32,13 @@ def save_category(
     entropy: list[float],
     avalanche: float,
 ):
+    # URUTAN DATASET DIPERTAHANKAN (tidak diurutkan berdasarkan waktu), sehingga
+    # indeks ke-i di semua run/metode = kalimat yang sama. Ini diperlukan
+    # untuk uji-t berpasangan di result.py.
     timed = [
         {"sentence": s, "execTime": t * 1e6}  # detik -> mikrodetik
         for s, t in zip(ciphertexts, times_s)
     ]
-    timed.sort(key=lambda x: x["execTime"])
 
     save_json(
         out_dir / f"{category}.json",
@@ -48,6 +49,7 @@ def save_category(
             "avalanche": avalanche,
             "data": timed,
         },
+        indent=None,  # kompak: file 1 juta kalimat jauh lebih kecil
     )
 
 

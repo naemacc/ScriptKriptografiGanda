@@ -1,11 +1,13 @@
-import json
-import os
-import time
+import json, os, sys, random, time
 
 # Folder input/output
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-input_dir = os.path.join(SCRIPT_DIR, "../data/interim/sense-categorized")
-output_dir = os.path.join(SCRIPT_DIR, "../data/processed/sense")
+input_dir = os.path.join(SCRIPT_DIR, "../stage/interim/sense-categorized")
+output_dir = os.path.join(SCRIPT_DIR, "../stage/processed/sense")
+sys.stdout.reconfigure(
+    encoding="utf-8", errors="replace"
+)  # cegah UnicodeEncodeError di konsol Windows (cp1252)
+SEED = 42  # seed tetap agar dataset dapat direproduksi
 
 
 def combine_sentences(sentences: list[str], min_words: int, max_words: int):
@@ -39,7 +41,7 @@ def load_file(name):
         return [content["total"], content["data"]]
 
 
-def redistribute(categories: dict[str, list[str]], target: int):
+def redistribute(categories: dict[str, list[str]], target: int, rng: random.Random):
     limits = {"pendek": (1, 30), "menengah": (31, 60), "panjang": (61, 100)}
 
     # Hitung kekurangan dan kelebihan tiap kategori
@@ -67,6 +69,7 @@ def redistribute(categories: dict[str, list[str]], target: int):
         categories[key][1] = categories[key][1][:target]
         categories[key][0] = len(categories[key][1])
 
+    rng.shuffle(surplus_pool)  # acak agar tidak berurutan alfabet
     print(f"Ukuran surplus_pool : {len(surplus_pool)}")
 
     loop_count = 0
@@ -122,7 +125,7 @@ def redistribute(categories: dict[str, list[str]], target: int):
                     short_buffer.append(sentence)
 
                     # Estimasi kasar: Hitung apakah tumpukan di dalam buffer sudah melebihi min_words
-                    buffer_words_len = sum(s.count(" ") + 1 for s in short_buffer)
+                    buffer_words_len = sum(len(s.split()) for s in short_buffer)
 
                     if buffer_words_len >= min_words:
                         combined = combine_sentences(short_buffer, min_words, max_words)
@@ -185,16 +188,19 @@ def main():
         "panjang": data_panjang,
     }
 
-    print(
-        "Jumlah awal -> "
-        + ", ".join(f"{k}: {v[0]}" for k, v in categories.items())
-    )
+    print("Jumlah awal -> " + ", ".join(f"{k}: {v[0]}" for k, v in categories.items()))
 
     # Menggunakan rasio 20% agar lebih masuk akal berdasarkan total kata vs jumlah kalimat
     total_all = data_pendek[0] + data_menengah[0] + data_panjang[0]
     target = int((total_all // 3) * 0.20)
 
-    redistribute(categories, target)
+    # Acak tiap kategori (02b mengurutkan alfabet) sebelum dipotong ke target,
+    # supaya yang dipertahankan adalah sampel acak, bukan awalan alfabet
+    rng = random.Random(SEED)
+    for _, items in categories.items():
+        rng.shuffle(items[1])
+
+    redistribute(categories, target, rng)
 
     print("Jumlah akhir -> " + ", ".join(f"{k}: {v[0]}" for k, v in categories.items()))
     print("Menyimpan hasil ...")

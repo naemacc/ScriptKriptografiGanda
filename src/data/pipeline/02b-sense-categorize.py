@@ -1,11 +1,12 @@
-import json
-import os
-import time
+import json, os, sys, time
 
 # Folder input/output
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-input_dir = os.path.join(SCRIPT_DIR, "../data/interim/cleaned")
-output_dir = os.path.join(SCRIPT_DIR, "../data/interim/sense-categorized")
+input_dir = os.path.join(SCRIPT_DIR, "../stage/interim/cleaned")
+output_dir = os.path.join(SCRIPT_DIR, "../stage/interim/sense-categorized")
+sys.stdout.reconfigure(
+    encoding="utf-8", errors="replace"
+)  # cegah UnicodeEncodeError di konsol Windows (cp1252)
 
 # Buat folder output jika belum ada
 os.makedirs(output_dir, exist_ok=True)

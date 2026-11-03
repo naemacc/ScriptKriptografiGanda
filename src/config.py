@@ -1,7 +1,7 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-PROCESSED_DIR = ROOT / "data" / "processed"
+PROCESSED_DIR = ROOT / "data" / "stage" / "processed"
 RUNS_DIR = ROOT / "results" / "runs"
 
 #Jumlah iterasi untuk setiap skenario dan metode

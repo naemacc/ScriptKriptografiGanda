@@ -12,7 +12,7 @@ def _rot13_inv(char):
 
 # Atbash adalah kebalikan dirinya sendiri, jadi tidak perlu fungsi inversi
 def _atbash(char):
-    return ALPHABET[(25 - ALPHABET.index(char)) % 27]
+    return ALPHABET[(26 - ALPHABET.index(char)) % 27]
 
 
 def _apply(string, even, odd):
@@ -28,13 +28,16 @@ def cross_decrypt(string):
     return _apply(string, _rot13_inv, _atbash)
 
 
-# Skema berurutan: ROT13 lalu Atbash pada setiap karakter
+# Skema berurutan (menyeluruh): seluruh teks diproses ROT13 dahulu (pass 1),
+# lalu seluruh hasilnya diproses Atbash (pass 2). Dekripsi membalik urutan.
 def sequenced_encrypt(string):
-    return "".join(_atbash(_rot13(c)) for c in string)
+    step1 = "".join(_rot13(c) for c in string)
+    return "".join(_atbash(c) for c in step1)
 
 
 def sequenced_decrypt(string):
-    return "".join(_rot13_inv(_atbash(c)) for c in string)
+    step1 = "".join(_atbash(c) for c in string)
+    return "".join(_rot13_inv(c) for c in step1)
 
 
 # Uji seluruh 27 karakter pada posisi genap dan ganjil.

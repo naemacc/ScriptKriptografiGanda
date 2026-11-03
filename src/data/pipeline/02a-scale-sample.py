@@ -1,15 +1,16 @@
-import json
-import os
-import random
-import time
+import json, os, sys, random, time
 
 # Folder input/output
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-input_dir = os.path.join(SCRIPT_DIR, "../data/interim/cleaned")
-output_dir = os.path.join(SCRIPT_DIR, "../data/processed/scale")
+input_dir = os.path.join(SCRIPT_DIR, "../stage/interim/cleaned")
+output_dir = os.path.join(SCRIPT_DIR, "../stage/processed/scale")
 os.makedirs(output_dir, exist_ok=True)
+sys.stdout.reconfigure(
+    encoding="utf-8", errors="replace"
+)  # cegah UnicodeEncodeError di konsol Windows (cp1252)
 
 LIMITS = {"sedikit": 100000, "sedang": 500000, "banyak": 1000000}
+SEED = 42  # seed tetap agar dataset dapat direproduksi
 
 
 # Cetak progress per 1% pada baris yang sama
@@ -31,19 +32,23 @@ def get_all_data():
 
     print(f"Total sebelum deduplikasi: {len(all_data)}")
     print("Menghapus duplikat ...")
-    return list(set(all_data))
+    # sorted() agar urutan tidak bergantung pada hash string; diacak SEKALI
+    # dengan seed tetap, sehingga kategori kecil adalah bagian dari yang besar
+    unique = sorted(set(all_data))
+    random.Random(SEED).shuffle(unique)
+    return unique
 
 
 def generate_target_data(source_pool: list, target_count: int):
+    rng = random.Random(SEED)  # augmentasi reproducible
     result = source_pool[: min(len(source_pool), target_count)]
-    random.shuffle(source_pool)  # Acak data sumber untuk variasi
 
     asli = len(result)
     print(f"  Data asli dipakai: {asli}, perlu augmentasi: {target_count - asli}")
 
     # Augmentasi jika data kurang dari target
     while len(result) < target_count:
-        result.append(f"{random.choice(source_pool)} {random.choice(source_pool)}")
+        result.append(f"{rng.choice(source_pool)} {rng.choice(source_pool)}")
         print_progress(len(result), target_count)
 
     if asli < target_count:

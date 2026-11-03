@@ -2,10 +2,10 @@
 .vscode/
 
 # Data dan hasil eksperimen (berat): di-zip manual
-/data/interim
-/data/processed
-/data/raw
-/results/runs/
+src/data/stage/interim
+src/data/stage/processed
+src/data/stage/raw
+src/results/runs/
 
 # compressed files
 *.7z

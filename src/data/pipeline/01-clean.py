@@ -1,12 +1,12 @@
-import json
-import os
-import string
-import time
+import json, os, sys, string, time
 
 # Folder input/output
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-input_dir = os.path.join(SCRIPT_DIR, "../data/raw")
-output_dir = os.path.join(SCRIPT_DIR, "../data/interim/cleaned")
+input_dir = os.path.join(SCRIPT_DIR, "../stage/raw")
+output_dir = os.path.join(SCRIPT_DIR, "../stage/interim/cleaned")
+sys.stdout.reconfigure(
+    encoding="utf-8", errors="replace"
+)  # cegah UnicodeEncodeError di konsol Windows (cp1252)
 
 # Buat folder output jika belum ada
 os.makedirs(output_dir, exist_ok=True)
@@ -36,8 +36,8 @@ def clean_az(text):  # Fungsi pembersih teks
     # Gabungkan list of chars menjadi string lagi
     cleaned_text = "".join(result_text)
 
-    # Buang spasi berlebih di depan/belakang
-    return cleaned_text.strip()
+    # Rapikan spasi: buang spasi di tepi dan ubah spasi ganda menjadi satu
+    return " ".join(cleaned_text.split())
 
 
 start_all = time.perf_counter()
@@ -49,14 +49,15 @@ for n, file in enumerate(files, start=1):  # Iterasi semua file di folder
     filepath = os.path.join(input_dir, file)
     try:
         # Baca file JSON
-        with open(filepath, "r") as input_file:
+        with open(filepath, "r", encoding="utf-8") as input_file:
             data = json.load(input_file)
     except Exception as e:
         print(f"  Error membaca {file!r}: {e}")
         continue
 
     cleaned_sentences = []
-    conversation = data.get("conversations", [])[0]
+    # Gabungkan SEMUA percakapan di file (sebelumnya hanya yang pertama)
+    conversation = [line for conv in data.get("conversations", []) for line in conv]
     total = len(conversation)
     print(f"  Membersihkan {total} baris")
 
@@ -75,7 +76,7 @@ for n, file in enumerate(files, start=1):  # Iterasi semua file di folder
 
     # Tulis hasil ke file baru di folder output
     output_path = os.path.join(output_dir, file)
-    with open(output_path, "w") as output_file:
+    with open(output_path, "w", encoding="utf-8") as output_file:
         json.dump(output_data, output_file, indent=2)
 
     print(
