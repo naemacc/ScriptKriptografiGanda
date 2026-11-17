@@ -3,7 +3,11 @@
 #   python experiments/run.py sc x       -> scale + cross
 # Alias: sc=scale, se=sense, x=cross, q=sequenced
 
-import argparse, sys
+import argparse, gc, sys, time
+from pathlib import Path
+
+# Tambahkan folder induk ke sys.path agar config dan src dapat diimpor
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from config import CATEGORIES, N_ITERATIONS, PROCESSED_DIR, RUNS_DIR
 from core.ciphers import CIPHERS, char_test
@@ -16,11 +20,13 @@ from core.io_utils import (
 )
 from core.metrics import validate
 
-ALIASES = {"sc": "scale", "se": "sense", "x": "cross", "q": "sequenced"}
-
 sys.stdout.reconfigure(
     encoding="utf-8", errors="replace"
-)
+)  # cegah UnicodeEncodeError di konsol Windows (cp1252)
+
+ALIASES = {"sc": "scale", "se": "sense", "x": "cross", "q": "sequenced"}
+WARMUP = 1000  # kalimat pemanasan (tidak diukur)
+
 
 def print_progress(i, total):
     step = max(1, total // 100)
@@ -32,18 +38,25 @@ def print_progress(i, total):
         )
 
 
-# Hanya proses enkripsi yang diukur waktunya
+# Hanya proses enkripsi yang diukur waktunya.
+# Pemanasan + GC dimatikan selama pengukuran agar noise lebih kecil.
 def encrypt_all(sentences, encrypt):
-    import time
+    for s in sentences[:WARMUP]:
+        encrypt(s)
 
     ciphertexts, times = [], []
     total = len(sentences)
-    for i, sentence in enumerate(sentences, start=1):
-        t0 = time.perf_counter()
-        enc = encrypt(sentence)
-        times.append(time.perf_counter() - t0)
-        ciphertexts.append(enc)
-        print_progress(i, total)
+    gc.collect()
+    gc.disable()
+    try:
+        for i, sentence in enumerate(sentences, start=1):
+            t0 = time.perf_counter()
+            enc = encrypt(sentence)
+            times.append(time.perf_counter() - t0)
+            ciphertexts.append(enc)
+            print_progress(i, total)
+    finally:
+        gc.enable()
     print()
     return ciphertexts, times
 
@@ -104,7 +117,9 @@ def run_category(category, data, encrypt, decrypt, out_dir):
     if verif["gagal"]:
         print(f"  [PERINGATAN] {verif['gagal']} kalimat gagal diverifikasi!")
 
-    save_category(out_dir, category, ciphertexts, times, ent, aval)
+    save_category(
+        out_dir, category, ciphertexts, times, ent, aval, plaintexts=sentences
+    )
     append_log(
         out_dir / "log.json",
         {
@@ -133,19 +148,33 @@ def run_iteration(scenario, method, iteration, datasets, uji_char):
         scenario, method, iteration, out_dir.name, verifs, uji_char
     )
     save_json(out_dir / "verification.json", ringkasan)
+    return ringkasan["total_gagal"] == 0 and all(v["jumlah_sesuai"] for v in verifs)
 
 
-def run_experiment(scenario, method):
-    encrypt, decrypt = CIPHERS[method]
-
+# Metode diselang-seling PER ITERASI (bukan semua cross lalu semua sequenced),
+# dan urutannya dibalik tiap iterasi genap, untuk menyeimbangkan efek drift CPU.
+def run_scenario(scenario, methods):
     datasets = {
         c: load_dataset(PROCESSED_DIR / scenario / f"{c}.json")
         for c in CATEGORIES[scenario]
     }
-    uji_char = char_test(encrypt, decrypt)
+    uji_char = {m: char_test(*CIPHERS[m]) for m in methods}
+    all_ok = all(
+        r["bijektif"] and r["dekripsi_sesuai"]
+        for res in uji_char.values()
+        for r in res.values()
+    )
+    if not all_ok:
+        print(
+            "[PERINGATAN] Uji karakter gagal (tidak bijektif / dekripsi tidak sesuai)!"
+        )
 
     for it in range(1, N_ITERATIONS + 1):
-        run_iteration(scenario, method, it, datasets, uji_char)
+        order = methods if it % 2 == 1 else methods[::-1]
+        for method in order:
+            if not run_iteration(scenario, method, it, datasets, uji_char[method]):
+                all_ok = False
+    return all_ok
 
 
 def resolve(value, choices, parser):
@@ -171,9 +200,18 @@ def main():
     scenarios = resolve(args.scenario, CATEGORIES.keys(), parser)
     methods = resolve(args.method, CIPHERS.keys(), parser)
 
+    all_ok = True
     for scenario in scenarios:
-        for method in methods:
-            run_experiment(scenario, method)
+        if not run_scenario(scenario, methods):
+            all_ok = False
+
+    if all_ok:
+        print("\nSemua verifikasi enkripsi-dekripsi: 100% sesuai.")
+    else:
+        print(
+            "\n[GAGAL] Ada verifikasi yang tidak 100% sesuai, periksa verification.json."
+        )
+        sys.exit(1)
 
 
 if __name__ == "__main__":

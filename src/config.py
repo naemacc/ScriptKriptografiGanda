@@ -4,8 +4,8 @@ ROOT = Path(__file__).resolve().parent
 PROCESSED_DIR = ROOT / "data" / "stage" / "processed"
 RUNS_DIR = ROOT / "results" / "runs"
 
-#Jumlah iterasi untuk setiap skenario dan metode
-N_ITERATIONS = 3
+# Jumlah iterasi untuk setiap skenario dan metode
+N_ITERATIONS = 10
 
 # Kategori skenario dan metode enkripsi
 CATEGORIES = {

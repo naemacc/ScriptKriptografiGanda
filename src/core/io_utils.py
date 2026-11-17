@@ -31,13 +31,17 @@ def save_category(
     times_s: list[float],
     entropy: list[float],
     avalanche: float,
+    plaintexts: list[str] | None = None,
 ):
     # URUTAN DATASET DIPERTAHANKAN (tidak diurutkan berdasarkan waktu), sehingga
-    # indeks ke-i di semua run/metode = kalimat yang sama. Ini diperlukan
-    # untuk uji-t berpasangan di result.py.
+    # indeks ke-i di semua run/metode = kalimat yang sama.
+    # Tiap entri mencatat plaintext, ciphertext, dan waktu enkripsinya (µs).
+    if plaintexts is None:
+        plaintexts = [None] * len(ciphertexts)
+
     timed = [
-        {"sentence": s, "execTime": t * 1e6}  # detik -> mikrodetik
-        for s, t in zip(ciphertexts, times_s)
+        {"plaintext": p, "ciphertext": c, "execTime": t * 1e6}  # detik -> mikrodetik
+        for p, c, t in zip(plaintexts, ciphertexts, times_s)
     ]
 
     save_json(

@@ -1,0 +1,164 @@
+[
+    {
+        "Skenario": "Skalabilitas",
+        "T-Test": {
+            "Sedikit": {
+                "n (Cross)": 100000,
+                "n (Sequenced)": 100000,
+                "Rata-rata Cross (µs)": 7.8532,
+                "Rata-rata Sequenced (µs)": 11.3145,
+                "Selisih Cross-Seq (µs)": -3.4613,
+                "t-value": -162.3831,
+                "p-value": "0.0000e+00",
+                "Cohen d": -0.7262,
+                "Hasil": "Signifikan (H1 diterima)",
+                "Pembanding berpasangan": {
+                    "t-value": -521.6985,
+                    "p-value": "0.0000e+00"
+                }
+            },
+            "Sedang": {
+                "n (Cross)": 500000,
+                "n (Sequenced)": 500000,
+                "Rata-rata Cross (µs)": 7.4185,
+                "Rata-rata Sequenced (µs)": 10.9238,
+                "Selisih Cross-Seq (µs)": -3.5052,
+                "t-value": -394.2895,
+                "p-value": "0.0000e+00",
+                "Cohen d": -0.7886,
+                "Hasil": "Signifikan (H1 diterima)",
+                "Pembanding berpasangan": {
+                    "t-value": -1258.9896,
+                    "p-value": "0.0000e+00"
+                }
+            },
+            "Banyak": {
+                "n (Cross)": 1000000,
+                "n (Sequenced)": 1000000,
+                "Rata-rata Cross (µs)": 7.6027,
+                "Rata-rata Sequenced (µs)": 11.3243,
+                "Selisih Cross-Seq (µs)": -3.7216,
+                "t-value": -538.732,
+                "p-value": "0.0000e+00",
+                "Cohen d": -0.7619,
+                "Hasil": "Signifikan (H1 diterima)",
+                "Pembanding berpasangan": {
+                    "t-value": -1685.944,
+                    "p-value": "0.0000e+00"
+                }
+            }
+        },
+        "Kenaikan Waktu": {
+            "Cross": {
+                "Sedikit -> Sedang": "372.33%",
+                "Sedang -> Banyak": "104.97%"
+            },
+            "Sequenced": {
+                "Sedikit -> Sedang": "382.73%",
+                "Sedang -> Banyak": "107.33%"
+            }
+        },
+        "Jumlah Iterasi": {
+            "Cross": [
+                10
+            ],
+            "Sequenced": [
+                10
+            ]
+        },
+        "Linearitas": {
+            "Cross": {
+                "Sedikit -> Sedang": {
+                    "Rasio waktu": 4.723,
+                    "Rasio data": 5.0,
+                    "Rasio waktu / rasio data": 0.945
+                },
+                "Sedikit -> Banyak": {
+                    "Rasio waktu": 9.681,
+                    "Rasio data": 10.0,
+                    "Rasio waktu / rasio data": 0.968
+                }
+            },
+            "Sequenced": {
+                "Sedikit -> Sedang": {
+                    "Rasio waktu": 4.827,
+                    "Rasio data": 5.0,
+                    "Rasio waktu / rasio data": 0.965
+                },
+                "Sedikit -> Banyak": {
+                    "Rasio waktu": 10.009,
+                    "Rasio data": 10.0,
+                    "Rasio waktu / rasio data": 1.001
+                }
+            }
+        }
+    },
+    {
+        "Skenario": "Sensitivitas",
+        "T-Test": {
+            "Pendek": {
+                "n (Cross)": 63714,
+                "n (Sequenced)": 63714,
+                "Rata-rata Cross (µs)": 7.822,
+                "Rata-rata Sequenced (µs)": 11.062,
+                "Selisih Cross-Seq (µs)": -3.24,
+                "t-value": -128.8024,
+                "p-value": "0.0000e+00",
+                "Cohen d": -0.7216,
+                "Hasil": "Signifikan (H1 diterima)",
+                "Pembanding berpasangan": {
+                    "t-value": -407.9324,
+                    "p-value": "0.0000e+00"
+                }
+            },
+            "Menengah": {
+                "n (Cross)": 63714,
+                "n (Sequenced)": 63714,
+                "Rata-rata Cross (µs)": 34.1587,
+                "Rata-rata Sequenced (µs)": 49.5545,
+                "Selisih Cross-Seq (µs)": -15.3959,
+                "t-value": -502.3393,
+                "p-value": "0.0000e+00",
+                "Cohen d": -2.8145,
+                "Hasil": "Signifikan (H1 diterima)",
+                "Pembanding berpasangan": {
+                    "t-value": -1165.7373,
+                    "p-value": "0.0000e+00"
+                }
+            },
+            "Panjang": {
+                "n (Cross)": 63714,
+                "n (Sequenced)": 63714,
+                "Rata-rata Cross (µs)": 62.0645,
+                "Rata-rata Sequenced (µs)": 90.6286,
+                "Selisih Cross-Seq (µs)": -28.564,
+                "t-value": -754.2996,
+                "p-value": "0.0000e+00",
+                "Cohen d": -4.2261,
+                "Hasil": "Signifikan (H1 diterima)",
+                "Pembanding berpasangan": {
+                    "t-value": -1397.5941,
+                    "p-value": "0.0000e+00"
+                }
+            }
+        },
+        "Kenaikan Waktu": {
+            "Cross": {
+                "Pendek -> Menengah": "336.70%",
+                "Menengah -> Panjang": "81.69%"
+            },
+            "Sequenced": {
+                "Pendek -> Menengah": "347.97%",
+                "Menengah -> Panjang": "82.89%"
+            }
+        },
+        "Jumlah Iterasi": {
+            "Cross": [
+                10
+            ],
+            "Sequenced": [
+                10
+            ]
+        }
+    }
+]

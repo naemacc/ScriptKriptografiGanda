@@ -60,8 +60,7 @@ def format_n(n):
 
 
 def load_data(base_dir, method_name, is_sensitivity=False):
-    """Mengembalikan (df_summary, times) dengan
-    times = {kategori: [array waktu (µs) per run, urutan dataset asli]}."""
+    # Mengembalikan (df_summary, times) dengan times = {kategori: [array waktu (µs) per run, urutan dataset asli]}
     summary_data = []
     times = {}
 
@@ -117,7 +116,7 @@ def load_data(base_dir, method_name, is_sensitivity=False):
 
 
 def mean_per_sentence(arrays):
-    """Rata-rata waktu tiap kalimat lintas iterasi (indeks ke-i = kalimat yang sama)."""
+    # Rata-rata waktu tiap kalimat lintas iterasi (indeks ke-i = kalimat yang sama)
     if len({a.size for a in arrays}) != 1:
         raise ValueError(
             "Jumlah kalimat antar iterasi berbeda; data tidak dapat dipasangkan."
@@ -484,8 +483,9 @@ def run_analysis(scenario_name, cross_dir, seq_dir, is_sensitivity):
         hue_order=grup_order,
         errorbar=None,
     )
+    plt.ylim(0, 7)  # ruang atas agar legenda tidak menutupi batang
     plt.title(f"Entropy Plaintext vs Ciphertext ({scenario_name})")
-    plt.legend(title="Data", fontsize=8)
+    plt.legend(title="Data", fontsize=8, loc="upper right")
     plt.tight_layout()
     simpan_grafik(f"grafik_3_entropy_{scenario_name.lower()}.png")
 
